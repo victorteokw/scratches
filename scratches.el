@@ -26,6 +26,7 @@
 
 (require 'f)
 (require 'dash)
+(require 'ido)
 
 (defgroup scratches nil
   "Multiple scratches in any language."
@@ -88,7 +89,6 @@
   (interactive (list (scratches--get-scratch-name)))
   (find-file-other-frame (f-expand name scratches-save-location)))
 
-
 (defun scratches-new-scratch-dwim ()
   "Automatically create a new scratch based on current mode."
   (interactive)
@@ -125,11 +125,22 @@
       (kill-buffer buffer)))
   (message "Killed all scratch buffers."))
 
-;; TODO
+(defvar scratches-last-visited-scratch-file nil
+  "Last visited scratches file.")
+
+(defun scratches-record-last-scratch ()
+  "Record last scratch file visited."
+  (let ((cb (buffer-file-name (current-buffer))))
+    (if (f-child-of? cb  scratches-save-location)
+        (setq scratches-last-visited-scratch-file cb))))
 
 (defun scratches-visit-last-scratch ()
   "Visit last scratch file."
-  (interactive))
+  (interactive)
+  (if (and scratches-last-visited-scratch-file
+           (f-file? scratches-last-visited-scratch-file))
+      (find-file scratches-last-visited-scratch-file)
+    (switch-to-buffer "*scratches*")))
 
 (defun scratches-switch-scratch ()
   "Switch opened scratch."
@@ -164,7 +175,10 @@ Otherwise behave as if called interactively.
                                         ;  :keymap scratches-mode-map
   :group 'convenience
   :require 'scratches
-  )
+  (if scratches-mode
+      (progn
+        (add-hook 'find-file-hook 'scratches-record-last-scratch nil t))
+    (remove-hook 'find-file-hook 'scratches-record-last-scratch t)))
 
 ;;;###autoload
 (define-globalized-minor-mode scratches-global-mode
