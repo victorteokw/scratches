@@ -4,6 +4,7 @@
 
 ;; Author: Zhang Kai Yu <yeannylam@gmail.com>
 ;; Keywords: scratch
+;; Package-Requires: ((dash "2.11.0") (f "0.17.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
