@@ -51,6 +51,33 @@
   :group 'scratches
   :type 'function)
 
+(defcustom scratches-keymap-prefix (kbd "C-c s")
+  "Scratches keymap prefix."
+  :group 'scratches
+  :type 'string)
+
+(defvar scratches-command-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "f") #'scratches-visit-scratch)
+    (define-key map (kbd "4 f") #'scratches-visit-scratch-other-window)
+    (define-key map (kbd "5 f") #'scratches-visit-scratch-other-frame)
+    (define-key map (kbd "n") #'scratches-new-scratch-dwim)
+    (define-key map (kbd "4 n") #'scratches-new-scratch-other-window-dwim)
+    (define-key map (kbd "5 n") #'scratches-new-scratch-other-frame-dwim)
+    (define-key map (kbd "k") #'scratches-kill-all-scratches)
+    map)
+  "Keymap for Scratches commands after `scratches-keymap-prefix'.")
+(fset 'scratches-command-map scratches-command-map)
+
+(defvar scratches-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map scratches-keymap-prefix 'scratches-command-map)
+    map)
+  "Keymap for Scratches mode.")
+
+(defvar scratches-last-visited-scratch-file nil
+  "Last visited scratches file.")
+
 (defun scratches--default-auto-incremental-name ()
   "Return the name that can be used for a new scratch file."
   (let* ((basen scratches-untitled-name)
@@ -125,9 +152,6 @@
       (kill-buffer buffer)))
   (message "Killed all scratch buffers."))
 
-(defvar scratches-last-visited-scratch-file nil
-  "Last visited scratches file.")
-
 (defun scratches-record-last-scratch ()
   "Record last scratch file visited."
   (let ((cb (buffer-file-name (current-buffer))))
@@ -142,21 +166,21 @@
       (find-file scratches-last-visited-scratch-file)
     (switch-to-buffer "*scratches*")))
 
-(defun scratches-switch-scratch ()
-  "Switch opened scratch."
-  (interactive))
+;; (defun scratches-switch-scratch ()
+;;   "Switch opened scratch."
+;;   (interactive))
 
-(defun scratches-switch-scratch-dwim ()
-  "Switch to scratch do what you mean."
-  (interactive))
+;; (defun scratches-switch-scratch-dwim ()
+;;   "Switch to scratch do what you mean."
+;;   (interactive))
 
-(defun scratches-switch-scratch-other-window-dwim ()
-  "Switch to scratch do what you mean."
-  (interactive))
+;; (defun scratches-switch-scratch-other-window-dwim ()
+;;   "Switch to scratch do what you mean."
+;;   (interactive))
 
-(defun scratches-switch-scratch-other-frame-dwim ()
-  "Switch to scratch do what you mean."
-  (interactive))
+;; (defun scratches-switch-scratch-other-frame-dwim ()
+;;   "Switch to scratch do what you mean."
+;;   (interactive))
 
 ;;;###autoload
 (define-minor-mode scratches-mode
@@ -172,7 +196,7 @@ Otherwise behave as if called interactively.
 
 \\{scratches-mode-map}"
   :lighter projectile-mode-line
-                                        ;  :keymap scratches-mode-map
+  :keymap scratches-mode-map
   :group 'convenience
   :require 'scratches
   (if scratches-mode
