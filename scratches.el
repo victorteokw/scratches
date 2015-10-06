@@ -52,8 +52,8 @@
   :group 'scratches
   :type 'function)
 
-(defcustom scratches-keymap-prefix (kbd "C-c s")
-  "Scratches keymap prefix."
+(defcustom scratches-keymap-prefix (kbd "C-x M-s")
+  "Scratches keymap prefix. You must set your own easy to use keymap prefix."
   :group 'scratches
   :type 'string)
 
