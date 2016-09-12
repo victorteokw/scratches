@@ -102,47 +102,50 @@
                            (f-files scratches-save-location nil t)))
     (ido-completing-read "Visit scratch: " file-names nil nil)))
 
+(defun scratches--new-scratch-with (file-opener)
+  "Create a new scratch based on current major mode and open it with FILE-OPENER."
+  (scratches--maybe-create-scratch-dir)
+  (let ((mm major-mode)
+        (filename (f-expand (funcall scratches-auto-incremental-name)
+                            scratches-save-location)))
+    (funcall file-opener filename)
+    (funcall (indirect-function mm))))
+
+(defun scratches--visit-scratch-with (name file-opener)
+  "Visit a scratch file with NAME and open it with FILE-OPENER."
+  (scratches--maybe-create-scratch-dir)
+  (let ((filename (f-expand name scratches-save-location)))
+    (funcall file-opener filename)))
+
 (defun scratches-visit-scratch (name)
   "Visit scratch file with NAME."
   (interactive (list (scratches--get-scratch-name)))
-  (find-file (f-expand name scratches-save-location)))
+  (scratches--visit-scratch-with name 'find-file))
 
 (defun scratches-visit-scratch-other-window (name)
   "Visit scratch file with NAME other window."
   (interactive (list (scratches--get-scratch-name)))
-  (find-file-other-window (f-expand name scratches-save-location)))
+  (scratches--visit-scratch-with name 'find-file-other-window))
 
 (defun scratches-visit-scratch-other-frame (name)
   "Visit scratch file with NAME other window."
   (interactive (list (scratches--get-scratch-name)))
-  (find-file-other-frame (f-expand name scratches-save-location)))
+  (scratches--visit-scratch-with name 'find-file-other-frame))
 
 (defun scratches-new-scratch-dwim ()
   "Automatically create a new scratch based on current mode."
   (interactive)
-  (scratches--maybe-create-scratch-dir)
-  (let ((mm major-mode))
-    (find-file (f-expand (funcall scratches-auto-incremental-name)
-                         scratches-save-location))
-    (funcall (indirect-function mm))))
+  (scratches--new-scratch-with 'find-file))
 
 (defun scratches-new-scratch-other-window-dwim ()
   "Automatically create a new scratch based on current mode."
   (interactive)
-  (scratches--maybe-create-scratch-dir)
-  (let ((mm major-mode))
-    (find-file-other-window (f-expand (funcall scratches-auto-incremental-name)
-                                      scratches-save-location))
-    (funcall (indirect-function mm))))
+  (scratches--new-scratch-with 'find-file-other-window))
 
 (defun scratches-new-scratch-other-frame-dwim ()
   "Automatically create a new scratch based on current mode."
   (interactive)
-  (scratches--maybe-create-scratch-dir)
-  (let ((mm major-mode))
-    (find-file-other-frame (f-expand (funcall scratches-auto-incremental-name)
-                                     scratches-save-location))
-    (funcall (indirect-function mm))))
+  (scratches--new-scratch-with 'find-file-other-frame))
 
 (defun scratches-kill-all-scratches ()
   "Kill all scratch buffers."
