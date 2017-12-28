@@ -1,4 +1,4 @@
-;;; scratches.el --- Multiple scratches in any language
+;;; scratches.el --- Multiple scratches in any language -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 Zhang Kai Yu
 
@@ -57,6 +57,18 @@
   :group 'scratches
   :type 'string)
 
+(defcustom scratches-ignored-files
+  (regexp-opt '(".dir-locals.el" "TAGS" "GTAGS" "GRTAGS" "GPATH") t)
+  "Default regexp of ignored files"
+  :group 'scratches
+  :type 'string)
+
+(defcustom scratches-files-filter-function
+  'scratches--default-files-filter-function
+  "The filter function for exclude uninteresting files in `scratches-save-location'."
+  :group 'scratches
+  :type 'function)
+
 (defvar scratches-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "f") #'scratches-visit-scratch)
@@ -79,6 +91,10 @@
 (defvar scratches-last-visited-scratch-file nil
   "Last visited scratches file.")
 
+(defun scratches--default-files-filter-function (filename)
+  "Return t if filename should be presented when visiting `scratches-save-location'."
+  (not (string-match scratches-ignored-files filename)))
+
 (defun scratches--default-auto-incremental-name ()
   "Return the name that can be used for a new scratch file."
   (let* ((basen scratches-untitled-name)
@@ -99,7 +115,7 @@
   (scratches--maybe-create-scratch-dir)
   (let (file-names)
     (setq file-names (-map (lambda (f) (f-relative f scratches-save-location))
-                           (f-files scratches-save-location nil t)))
+                           (f-files scratches-save-location scratches-files-filter-function t)))
     (ido-completing-read "Visit scratch: " file-names nil nil)))
 
 (defun scratches-visit-scratch (name)
